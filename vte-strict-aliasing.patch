@@ -1,0 +1,22 @@
+diff -up vte-0.25.1/gnome-pty-helper/gnome-pty-helper.c.strict-aliasing vte-0.25.1/gnome-pty-helper/gnome-pty-helper.c
+--- vte-0.25.1/gnome-pty-helper/gnome-pty-helper.c.strict-aliasing	2010-06-03 11:15:29.204961557 -0400
++++ vte-0.25.1/gnome-pty-helper/gnome-pty-helper.c	2010-06-03 11:15:32.194708240 -0400
+@@ -113,6 +113,7 @@ pass_fd (int client_fd, int fd)
+         char          buf [1];
+         char    cmsgbuf[CMSG_SPACE(sizeof(int))];
+         struct  cmsghdr *cmptr;
++        int *fdptr;
+ 
+ 	iov [0].iov_base = buf;
+ 	iov [0].iov_len  = 1;
+@@ -128,8 +129,8 @@ pass_fd (int client_fd, int fd)
+ 	cmptr->cmsg_level = SOL_SOCKET;
+ 	cmptr->cmsg_type  = SCM_RIGHTS;
+ 	cmptr->cmsg_len   = CMSG_LEN(sizeof(int));
+-	*(int *)CMSG_DATA (cmptr) = fd;
+-
++        fdptr = (int *) CMSG_DATA(cmptr);
++        memcpy (fdptr, &fd, sizeof(int));
+ 	if (sendmsg (client_fd, &msg, 0) != 1)
+ 		return -1;
+ 
